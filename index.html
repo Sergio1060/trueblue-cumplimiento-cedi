@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>True Blue · Cumplimiento por CEDI | Quick Last Mile</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --tinta:#0B0B0C; --panel:#141417; --panel2:#1B1B1F; --linea:#2C2C32;
+  --oro:#F5C800; --oro2:#F59E1F; --hueso:#E9E9E4; --tenue:#8C8F96;
+  --alarma:#FF4D3D; --abierta:#7C8896;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{background:var(--tinta);color:var(--hueso);font-family:'Space Grotesk',ui-sans-serif,system-ui,sans-serif;
+  font-size:17px;line-height:1.5;min-height:100vh}
+h1,h2,h3,.grande,.kpi b,.hh,.cifras b,.novs b{font-family:'Barlow Condensed','Arial Narrow',sans-serif;letter-spacing:.01em}
+.wrap{max-width:1500px;margin:0 auto;padding:0 32px 80px}
+.mono{font-variant-numeric:tabular-nums;letter-spacing:.02em}
+.num{text-align:right;font-variant-numeric:tabular-nums}
+.bad{color:var(--alarma)} .dim{color:var(--tenue)}
+button{font-family:inherit;cursor:pointer}
+
+/* ---------- cabecera ---------- */
+header.top{border-bottom:1px solid var(--linea);padding:34px 0 26px}
+.eyebrow{display:flex;flex-wrap:wrap;gap:8px 18px;align-items:center;font-size:14px;letter-spacing:.22em;
+  text-transform:uppercase;color:var(--tenue)}
+.eyebrow .marca{color:var(--tinta);background:var(--oro);padding:4px 10px;font-weight:700;letter-spacing:.14em}
+h1{font-size:clamp(40px,5.2vw,72px);line-height:.94;margin:16px 0 10px;font-weight:600;text-transform:uppercase}
+h1 em{font-style:normal;color:var(--oro)}
+.bajada{color:var(--tenue);max-width:66ch;font-size:19px}
+
+/* ---------- cargue ---------- */
+.cargue{margin:38px 0 0}
+#dropzone{border:2px dashed #4A4A22;background:linear-gradient(180deg,#17170F,#121214);
+  padding:52px 24px;text-align:center;cursor:pointer;transition:border-color .15s,background .15s}
+#dropzone:hover,#dropzone.hover{border-color:var(--oro);background:#1C1C12}
+#dropzone .ico{font-size:40px;display:block;margin-bottom:14px}
+#dropzone h3{font-size:26px;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;font-weight:600}
+#dropzone p{color:var(--tenue);font-size:16px;max-width:60ch;margin:0 auto}
+#dropzone b{color:var(--oro)}
+#dropzone .fmt{font-size:14px;margin-top:14px;color:#6E7178}
+.error{display:none;background:#2A1310;border-left:3px solid var(--alarma);color:#FFB6AE;
+  padding:14px 16px;margin-top:16px;font-size:15px}
+
+/* ---------- barra de control ---------- */
+.control{display:none;flex-wrap:wrap;gap:14px 26px;align-items:flex-end;background:var(--panel);
+  border:1px solid var(--linea);padding:18px 22px;margin:26px 0 0}
+.campo{display:flex;flex-direction:column;gap:6px}
+.campo label{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--tenue)}
+.campo input[type=date],.campo select{background:var(--panel2);border:1px solid var(--linea);color:var(--hueso);
+  font-family:inherit;font-size:15px;padding:8px 10px;color-scheme:dark}
+.ajustes{display:flex;flex-wrap:wrap;gap:8px}
+.chip{display:inline-flex;align-items:center;gap:8px;background:var(--panel2);border:1px solid var(--linea);
+  padding:8px 12px;font-size:14px;cursor:pointer;user-select:none}
+.chip input{accent-color:var(--oro2);width:15px;height:15px;cursor:pointer}
+.chip.on{border-color:var(--oro2);background:#241B08;color:var(--hueso)}
+.acciones{display:flex;gap:8px;margin-left:auto;flex-wrap:wrap}
+.acciones button{background:transparent;border:1px solid var(--linea);color:var(--tenue);font-size:14px;
+  padding:9px 16px;letter-spacing:.05em}
+.acciones button:hover{border-color:var(--oro);color:var(--hueso)}
+.acciones .pri{background:var(--oro);border-color:var(--oro);color:#151200;font-weight:700}
+.acciones .pri:hover{background:#ffd831;color:#151200}
+
+#reporte{display:none}
+
+/* ---------- kpis ---------- */
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:1px;
+  background:var(--linea);border:1px solid var(--linea);margin:34px 0 56px}
+.kpi{background:var(--panel);padding:22px 24px 20px}
+.kpi b{display:block;font-size:64px;line-height:.9;font-weight:600}
+.kpi span{display:block;color:var(--tenue);font-size:15px;margin-top:8px;text-transform:uppercase;letter-spacing:.1em}
+.kpi.oro b{color:var(--oro)} .kpi.rojo b{color:var(--alarma)} .kpi.gris b{color:var(--abierta)}
+.kpi small{display:block;color:var(--tenue);font-size:14px;margin-top:6px}
+
+section{margin:0 0 64px}
+h2{font-size:15px;letter-spacing:.24em;text-transform:uppercase;color:var(--oro);margin-bottom:6px;font-weight:600}
+.lead{margin-bottom:26px;color:var(--tenue);max-width:82ch;font-size:18px}
+.lead b{color:var(--hueso);font-weight:500}
+
+/* ---------- linea de corte ---------- */
+.corte{background:var(--panel);border:1px solid var(--linea);padding:28px 24px 16px}
+.grafo{display:flex;align-items:flex-end;gap:3px;height:280px;overflow-x:auto;padding-bottom:4px}
+.col{flex:1 1 0;min-width:16px;height:100%;display:flex;flex-direction:column;justify-content:flex-end;position:relative}
+.col[data-corte]::before{content:"";position:absolute;left:-3px;top:0;bottom:22px;width:2px;
+  background:repeating-linear-gradient(180deg,var(--alarma) 0 7px,transparent 7px 13px)}
+.col[data-corte]::after{content:"CORTE 00:00";position:absolute;left:6px;top:1px;font-size:12px;
+  letter-spacing:.16em;color:var(--alarma);white-space:nowrap}
+.val{font-size:12px;color:var(--tenue);text-align:center;height:15px}
+.bar{display:flex;flex-direction:column;width:100%}
+.seg{display:block;width:100%}
+.seg.out{background:var(--alarma)}
+.seg.aj{background:repeating-linear-gradient(135deg,var(--alarma) 0 4px,#8f2317 4px 8px)}
+.hh{font-size:13px;color:var(--tenue);text-align:center;padding-top:7px;font-variant-numeric:tabular-nums}
+.dias{display:flex;border-top:1px solid var(--linea);margin-top:2px;font-size:13px;letter-spacing:.18em;
+  text-transform:uppercase;color:var(--tenue)}
+.dias span{padding:10px 0}
+.dias .d6{flex:24;border-right:1px solid var(--linea)}
+.dias .d7{flex:24;padding-left:12px;color:var(--alarma)}
+.leyenda{display:flex;flex-wrap:wrap;gap:22px;margin-top:18px;font-size:14px;color:var(--tenue)}
+.leyenda i{display:inline-block;width:16px;height:10px;margin-right:8px;vertical-align:middle}
+
+/* ---------- tarjetas cedi ---------- */
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(360px,1fr));gap:20px}
+.cedi{background:var(--panel);border:1px solid var(--linea);border-top:3px solid var(--oro);padding:24px}
+.cedi.alerta{border-top-color:var(--alarma)}
+.cedi h3{font-size:26px;text-transform:uppercase;letter-spacing:.08em;font-weight:600}
+.grande{display:flex;align-items:baseline;gap:4px}
+.grande span{font-family:'Barlow Condensed',sans-serif;font-size:78px;line-height:1;font-weight:600}
+.grande em{font-style:normal;font-size:26px;color:var(--tenue)}
+.cedi .sub{margin-bottom:16px;color:var(--tenue);font-size:14px;text-transform:uppercase;letter-spacing:.1em}
+.barra{height:8px;background:var(--panel2);position:relative;margin-bottom:20px}
+.barra::before{content:"";position:absolute;inset:0 auto 0 0;width:var(--pa);
+  background:repeating-linear-gradient(135deg,var(--oro2) 0 5px,#7a5000 5px 10px)}
+.barra::after{content:"";position:absolute;inset:0 auto 0 0;width:var(--p);background:var(--oro)}
+.cifras{list-style:none;margin-bottom:18px;display:grid;grid-template-columns:1fr 1fr;gap:12px 10px}
+.cifras li{border-left:2px solid var(--linea);padding-left:10px}
+.cifras li.bad{border-left-color:var(--alarma)}
+.cifras b{display:block;font-size:28px;font-weight:600}
+.cifras li.bad b{color:var(--alarma)}
+.cifras span{font-size:13px;color:var(--tenue);line-height:1.3;display:block}
+.ajuste,.conc{background:var(--panel2);border-left:2px solid var(--oro2);padding:12px 14px;font-size:14.5px;
+  color:var(--tenue);margin-bottom:14px}
+.conc{border-left-color:var(--alarma)}
+.ajuste b,.conc b{color:var(--hueso)}
+.tag,.conc .k{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;
+  padding:3px 7px;margin-right:8px}
+.tag{background:var(--oro2);color:#1a1200}
+.conc .k{background:var(--alarma);color:#210603}
+table{width:100%;border-collapse:collapse}
+.mini{font-size:14.5px}
+.mini th{text-align:left;color:var(--tenue);font-weight:500;font-size:12px;letter-spacing:.12em;
+  text-transform:uppercase;border-bottom:1px solid var(--linea);padding:6px}
+.mini td{padding:6px;border-bottom:1px solid #202024}
+.pie{color:var(--tenue);font-size:13px;padding-top:12px}
+
+/* ---------- gestion ---------- */
+.filtros{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px}
+.filtros button{background:transparent;border:1px solid var(--linea);color:var(--tenue);font-size:14px;
+  padding:8px 16px;letter-spacing:.06em}
+.filtros button:hover{border-color:var(--oro);color:var(--hueso)}
+.filtros button[aria-pressed="true"]{background:var(--oro);border-color:var(--oro);color:#151200;font-weight:700}
+.tabla{background:var(--panel);border:1px solid var(--linea);overflow-x:auto;max-height:640px;overflow-y:auto}
+.tabla table{min-width:940px;font-size:15px}
+.tabla th{position:sticky;top:0;background:var(--panel2);text-align:left;font-size:12px;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--tenue);font-weight:500;padding:11px 12px;border-bottom:1px solid var(--linea)}
+.tabla td{padding:10px 12px;border-bottom:1px solid #1F1F23;vertical-align:top}
+.tabla tr:hover td{background:#191920}
+.dir{color:var(--tenue);font-size:13.5px;max-width:280px}
+.et{font-size:11px;letter-spacing:.1em;text-transform:uppercase;padding:3px 8px;white-space:nowrap;font-weight:700}
+.et-out{background:var(--alarma);color:#210603}
+.et-open{background:var(--abierta);color:#0C1116}
+.et-aj{background:#3A3A20;color:var(--oro);border:1px solid #5c5a2a}
+.vacio{padding:30px;text-align:center;color:var(--tenue)}
+
+/* ---------- cierre ---------- */
+.dos{display:grid;grid-template-columns:1.2fr 1fr;gap:24px}
+.caja{background:var(--panel);border:1px solid var(--linea);padding:22px 24px}
+.caja h3{font-size:20px;margin-bottom:16px;text-transform:uppercase;letter-spacing:.1em;font-weight:600}
+.novs{list-style:none}
+.novs li{display:grid;grid-template-columns:1.1fr 2fr auto;gap:14px;align-items:center;padding:9px 0;
+  border-bottom:1px solid #1F1F23;font-size:15px}
+.track{background:var(--panel2);height:9px}
+.track i{display:block;height:100%;background:var(--oro2)}
+.novs b{font-size:22px}
+.ciud{font-size:16px;line-height:2.1}
+.nota{border-top:1px solid var(--linea);padding-top:22px;color:var(--tenue);font-size:14.5px;max-width:100ch}
+.nota b{color:var(--hueso);font-weight:500}
+.nota ol{padding-left:20px;margin-top:10px}
+.nota li{margin-bottom:6px}
+.pie-doc{margin-top:34px;border-top:1px solid var(--linea);padding-top:18px;color:#63666D;font-size:13px;
+  display:flex;flex-wrap:wrap;gap:6px 20px}
+
+@media (max-width:900px){
+  .wrap{padding:0 18px 60px} .dos{grid-template-columns:1fr} .kpi b{font-size:48px}
+  .grafo{height:220px} .eyebrow{letter-spacing:.12em;font-size:12px} .acciones{margin-left:0}
+}
+@media print{
+  body{background:#fff;color:#000} .cargue,.control,.filtros{display:none!important}
+  .tabla{overflow:visible;max-height:none} section{break-inside:avoid}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="top">
+  <div class="eyebrow">
+    <span class="marca">QUICK</span>
+    <span>Dirección de Operaciones</span>
+    <span>Cuenta True Blue</span>
+    <span id="selloCorte">Cargue el informe del día</span>
+  </div>
+  <h1>Fecha comprometida <em>vs.</em> fecha de cierre</h1>
+  <p class="bajada">Cumplimiento por CEDI del día de operación. Cumple lo que cierra dentro del día comprometido;
+  lo que cruza la medianoche queda fuera de SLA. Las guías canceladas salen del universo porque no son
+  responsabilidad de la operación.</p>
+</header>
+
+<div class="cargue">
+  <div id="dropzone">
+    <span class="ico">📦</span>
+    <h3>Cargue el archivo de servicios del día</h3>
+    <p>Arrastre aquí el CSV exportado de SmartQuick o <b>haga clic para seleccionarlo</b></p>
+    <p class="fmt">Formato esperado: Servicios (*.csv, separado por «;») con columnas <b>Fecha</b>, <b>finalizado</b>,
+    <b>CEDI</b>, <b>Estado</b>, <b>Recurso</b> y <b>Novedad</b></p>
+  </div>
+  <div class="error" id="errorMsg"></div>
+</div>
+
+<div class="control" id="control">
+  <div class="campo">
+    <label for="fechaOp">Día comprometido</label>
+    <input type="date" id="fechaOp">
+  </div>
+  <div class="campo" style="flex:1 1 340px">
+    <label>Cierres del día siguiente reconocidos por novedad del recurso</label>
+    <div class="ajustes" id="ajustes"></div>
+  </div>
+  <div class="acciones">
+    <button id="btnCsv">Exportar guías en gestión</button>
+    <button id="btnImprimir">Imprimir / PDF</button>
+    <button class="pri" id="btnOtro">Cargar otro informe</button>
+  </div>
+</div>
+
+<div id="reporte"></div>
+
+</div>
+
+<script>
+/* =====================================================================
+   Tablero de cumplimiento por CEDI · Fecha comprometida vs. finalizado
+   Todo el procesamiento ocurre en el navegador: el CSV no sale del equipo.
+   ===================================================================== */
+const PALETA   = ['#F5C800','#F59E1F','#E2E8DC','#C98BE0','#57C4C4','#9FBF3B'];
+const TILDES   = {'BOGOTA':'Bogotá','MEDELLIN':'Medellín','CHIA':'Chía','CAJICA':'Cajicá',
+                  'ZIPAQUIRA':'Zipaquirá','IBAGUE':'Ibagué','MONTERIA':'Montería','SINCELEJO':'Sincelejo',
+                  'CUCUTA':'Cúcuta','MANIZALES':'Manizales','POPAYAN':'Popayán','VALLEDUPAR':'Valledupar'};
+const MESES    = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+const DIAS     = ['domingo','lunes','martes','miércoles','jueves','viernes','sábado'];
+
+let ESTADO = { filas: [], fechaOp: null, ajustes: new Set(), calc: null, nombreArchivo: '' };
+
+/* ---------------- lector de CSV (sin dependencias externas) ---------------- */
+function detectarDelim(linea){
+  const c = { ';':0, ',':0, '\t':0, '|':0 };
+  let dentro = false;
+  for (const ch of linea){
+    if (ch === '"') { dentro = !dentro; continue; }
+    if (!dentro && ch in c) c[ch]++;
+  }
+  return Object.keys(c).reduce((a,b) => c[b] > c[a] ? b : a, ';');
+}
+function parseCSV(texto){
+  texto = texto.replace(/^\uFEFF/, '');
+  const primeraLinea = texto.slice(0, texto.search(/\r?\n/) + 1 || texto.length);
+  const D = detectarDelim(primeraLinea);
+  const filas = []; let campo = '', fila = [], dentro = false;
+  for (let i = 0; i < texto.length; i++){
+    const ch = texto[i];
+    if (dentro){
+      if (ch === '"'){ if (texto[i+1] === '"'){ campo += '"'; i++; } else dentro = false; }
+      else campo += ch;
+    } else if (ch === '"') dentro = true;
+    else if (ch === D){ fila.push(campo); campo = ''; }
+    else if (ch === '\n'){ fila.push(campo); filas.push(fila); fila = []; campo = ''; }
+    else if (ch !== '\r') campo += ch;
+  }
+  if (campo !== '' || fila.length){ fila.push(campo); filas.push(fila); }
+  if (!filas.length) return [];
+  const cab = filas[0].map(h => h.trim());
+  return filas.slice(1)
+    .filter(f => f.length > 1 && f.some(v => String(v).trim() !== ''))
+    .map(f => Object.fromEntries(cab.map((h,i) => [h, f[i] !== undefined ? f[i] : ''])));
+}
+
+/* ---------------- utilidades ---------------- */
+const limpiar = t => String(t == null ? '' : t).replace(/\s+/g,' ').trim();
+const sinTildes = t => limpiar(t).normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+function titulo(t){
+  t = limpiar(t);
+  if (TILDES[t.toUpperCase()]) return TILDES[t.toUpperCase()];
+  if (t !== t.toUpperCase()) return t;
+  return t.toLowerCase().replace(/(^|\s|\/)([a-záéíóúñ])/g, (m,a,b) => a + b.toUpperCase());
+}
+function nombreCedi(v){
+  const p = String(v || '').split(' - ');
+  return titulo(p.length > 1 ? p[p.length-1] : String(v || 'Sin CEDI'));
+}
+/* Devuelve {dia:'YYYY-MM-DD', hora:'HH:MM'} desde varios formatos de fecha */
+function partirFecha(v){
+  const s = limpiar(v);
+  if (!s) return { dia:'', hora:'' };
+  let m = s.match(/^(\d{4})-(\d{2})-(\d{2})(?:[ T](\d{2}):(\d{2}))?/);
+  if (m) return { dia:`${m[1]}-${m[2]}-${m[3]}`, hora: m[4] ? `${m[4]}:${m[5]}` : '' };
+  m = s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})(?:[ T](\d{1,2}):(\d{2}))?/);
+  if (m) return { dia:`${m[3]}-${m[2].padStart(2,'0')}-${m[1].padStart(2,'0')}`,
+                  hora: m[4] ? `${m[4].padStart(2,'0')}:${m[5]}` : '' };
+  return { dia:'', hora:'' };
+}
+const sumarDias = (iso,n) => { const d = new Date(iso+'T12:00:00'); d.setDate(d.getDate()+n);
+  return d.toISOString().slice(0,10); };
+function fechaLarga(iso){
+  const d = new Date(iso+'T12:00:00');
+  return `${DIAS[d.getDay()]} ${d.getDate()} de ${MESES[d.getMonth()]}`;
+}
+const ddMes = iso => `${iso.slice(8,10)}-${MESES[+iso.slice(5,7)-1].slice(0,3)}`;
+const pct = (a,b) => b ? Math.round(1000*a/b)/10 : 0;
+const esc = t => String(t==null?'':t).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+/* ---------------- cargue ---------------- */
+const dropzone = document.getElementById('dropzone');
+const errorMsg = document.getElementById('errorMsg');
+const fileInput = Object.assign(document.createElement('input'), { type:'file', accept:'.csv,text/csv' });
+fileInput.style.display = 'none';
+document.body.appendChild(fileInput);
+
+dropzone.addEventListener('click', () => fileInput.click());
+dropzone.addEventListener('dragover', e => { e.preventDefault(); dropzone.classList.add('hover'); });
+dropzone.addEventListener('dragleave', () => dropzone.classList.remove('hover'));
+dropzone.addEventListener('drop', e => {
+  e.preventDefault(); dropzone.classList.remove('hover');
+  if (e.dataTransfer.files.length) leerArchivo(e.dataTransfer.files[0]);
+});
+fileInput.addEventListener('change', e => { if (e.target.files.length) leerArchivo(e.target.files[0]); });
+
+function mostrarError(msg){ errorMsg.textContent = msg; errorMsg.style.display = 'block'; }
+
+function leerArchivo(file){
+  errorMsg.style.display = 'none';
+  ESTADO.nombreArchivo = file.name;
+  const lector = new FileReader();
+  lector.onload = () => {
+    try { recibirFilas(parseCSV(lector.result)); }
+    catch(err){ mostrarError('No fue posible procesar el archivo: ' + err.message); }
+  };
+  lector.onerror = () => mostrarError('No fue posible leer el archivo.');
+  lector.readAsText(file, 'UTF-8');
+}
+
+function recibirFilas(filas){
+  if (!filas.length) return mostrarError('El archivo está vacío o no se pudo leer.');
+  const cols = Object.keys(filas[0]);
+  const busca = (...nombres) => cols.find(c => nombres.includes(sinTildes(c).toLowerCase()));
+  const C = {
+    guia:    busca('guia','guía','numero de guia','remesa'),
+    fecha:   busca('fecha','fecha de servicio','fecha comprometida'),
+    fin:     busca('finalizado','fecha finalizado','cierre'),
+    cedi:    busca('cedi'),
+    ciudad:  busca('ciudad'),
+    estado:  busca('estado'),
+    recurso: busca('recurso','placa'),
+    novedad: busca('novedad'),
+    desc:    busca('descripcion de novedad'),
+    dir:     busca('direccion'),
+    tipo:    busca('tipo de servicio')
+  };
+  if (!C.fecha || !C.fin || !C.estado){
+    return mostrarError('El archivo no trae las columnas necesarias: se requieren «Fecha», «finalizado» y «Estado».');
+  }
+  ESTADO.filas = filas.map(r => {
+    const f = partirFecha(r[C.fecha]), fin = partirFecha(r[C.fin]);
+    return {
+      guia:    limpiar(C.guia ? r[C.guia] : ''),
+      fecha:   f.dia,
+      dia:     fin.dia,
+      hora:    fin.hora,
+      cedi:    nombreCedi(C.cedi ? r[C.cedi] : (C.ciudad ? r[C.ciudad] : 'Sin CEDI')),
+      ciudad:  titulo(C.ciudad ? r[C.ciudad] : ''),
+      estado:  titulo(C.estado ? r[C.estado] : ''),
+      recurso: limpiar(C.recurso ? r[C.recurso] : '—'),
+      novedad: titulo(C.novedad ? r[C.novedad] : ''),
+      dir:     limpiar(C.dir ? r[C.dir] : '').slice(0,80),
+      tipo:    titulo(C.tipo ? r[C.tipo] : '')
+    };
+  }).filter(r => r.fecha || r.dia);
+
+  if (!ESTADO.filas.length) return mostrarError('No se reconocieron fechas válidas en el archivo.');
+
+  /* Día comprometido = la fecha de servicio más frecuente del archivo */
+  const conteo = {};
+  ESTADO.filas.forEach(r => { if (r.fecha) conteo[r.fecha] = (conteo[r.fecha]||0)+1; });
+  ESTADO.fechaOp = Object.keys(conteo).sort((a,b) => conteo[b]-conteo[a] || (a<b?1:-1))[0];
+  document.getElementById('fechaOp').value = ESTADO.fechaOp;
+  ESTADO.ajustes = new Set();
+  pintarChips();
+  calcularYRender();
+  document.getElementById('control').style.display = 'flex';
+  document.getElementById('reporte').style.display = 'block';
+  document.querySelector('.cargue').style.display = 'none';
+  window.scrollTo({ top:0, behavior:'smooth' });
+}
+
+/* ---------------- controles ---------------- */
+document.getElementById('fechaOp').addEventListener('change', e => {
+  if (!e.target.value) return;
+  ESTADO.fechaOp = e.target.value;
+  calcularYRender();
+});
+document.getElementById('btnOtro').addEventListener('click', () => {
+  document.querySelector('.cargue').style.display = 'block';
+  document.getElementById('control').style.display = 'none';
+  document.getElementById('reporte').style.display = 'none';
+  fileInput.value = '';
+  window.scrollTo({ top:0, behavior:'smooth' });
+});
+document.getElementById('btnImprimir').addEventListener('click', () => window.print());
+document.getElementById('btnCsv').addEventListener('click', exportarCsv);
+
+function pintarChips(){
+  const cedis = [...new Set(ESTADO.filas.map(r => r.cedi))].sort();
+  document.getElementById('ajustes').innerHTML = cedis.map(c =>
+    `<label class="chip" data-cedi="${esc(c)}"><input type="checkbox" value="${esc(c)}">${esc(c)}</label>`).join('');
+  document.querySelectorAll('#ajustes input').forEach(inp => {
+    inp.addEventListener('change', e => {
+      const v = e.target.value;
+      e.target.checked ? ESTADO.ajustes.add(v) : ESTADO.ajustes.delete(v);
+      e.target.closest('.chip').classList.toggle('on', e.target.checked);
+      calcularYRender();
+    });
+  });
+}
+
+/* ---------------- cálculo ---------------- */
+function calcularYRender(){
+  const fop = ESTADO.fechaOp;
+  const universo = [], canceladas = {};
+  ESTADO.filas.forEach(r => {
+    if (r.fecha && r.fecha !== fop) return;                 // solo el día evaluado
+    if (sinTildes(r.estado).toLowerCase() === 'cancelado'){  // fuera del universo
+      canceladas[r.cedi] = (canceladas[r.cedi]||0)+1; return;
+    }
+    let clase = 'sin_cerrar';
+    if (r.dia) clase = r.dia > fop ? 'fuera_sla' : 'en_sla';
+    const ajustada = clase === 'fuera_sla' && ESTADO.ajustes.has(r.cedi);
+    universo.push({ ...r, clase, ajustada, claseAj: ajustada ? 'en_sla' : clase });
+  });
+
+  const bloque = (sub, nombre) => {
+    const n = k => sub.filter(g => g.clase === k).length;
+    const aj = sub.filter(g => g.ajustada).length;
+    const entregadas = sub.filter(g => sinTildes(g.novedad).toLowerCase() === 'entregado').length;
+    const rec = {};
+    sub.forEach(g => { (rec[g.recurso] = rec[g.recurso] || {en_sla:0,fuera_sla:0,sin_cerrar:0,total:0});
+                       rec[g.recurso][g.clase]++; rec[g.recurso].total++; });
+    const recursos = Object.entries(rec).map(([k,v]) => ({recurso:k, ...v}))
+      .sort((a,b) => (b.fuera_sla+b.sin_cerrar)-(a.fuera_sla+a.sin_cerrar) || b.total-a.total);
+    const novs = {};
+    sub.forEach(g => { if (sinTildes(g.novedad).toLowerCase() !== 'entregado'){
+      const k = g.novedad || 'Sin cierre'; novs[k] = (novs[k]||0)+1; } });
+    const ciud = {};
+    sub.forEach(g => { if (g.ciudad) ciud[g.ciudad] = (ciud[g.ciudad]||0)+1; });
+    return {
+      cedi:nombre, total:sub.length, en_sla:n('en_sla'), fuera_sla:n('fuera_sla'), sin_cerrar:n('sin_cerrar'),
+      ajustadas:aj, en_sla_aj:n('en_sla')+aj, entregadas,
+      cumpl:pct(n('en_sla'),sub.length), cumpl_aj:pct(n('en_sla')+aj,sub.length),
+      efectividad:pct(entregadas,sub.length), canceladas: canceladas[nombre] || 0,
+      recursos, n_recursos:recursos.length,
+      novedades: Object.entries(novs).sort((a,b) => b[1]-a[1]),
+      ciudades: Object.entries(ciud).sort((a,b) => b[1]-a[1])
+    };
+  };
+
+  const nombres = [...new Set(universo.map(g => g.cedi))]
+    .sort((a,b) => universo.filter(g=>g.cedi===b).length - universo.filter(g=>g.cedi===a).length);
+  const total = bloque(universo, 'Nacional');
+  total.canceladas = Object.values(canceladas).reduce((a,b)=>a+b,0);
+  ESTADO.calc = {
+    universo, total, color: Object.fromEntries(nombres.map((n,i)=>[n, PALETA[i%PALETA.length]])),
+    cedis: nombres.map(n => bloque(universo.filter(g => g.cedi === n), n)),
+    criticas: universo.filter(g => g.clase !== 'en_sla')
+      .sort((a,b) => a.cedi.localeCompare(b.cedi) || a.clase.localeCompare(b.clase)
+                  || a.recurso.localeCompare(b.recurso) || a.guia.localeCompare(b.guia))
+  };
+  render();
+}
+
+/* ---------------- render ---------------- */
+function render(){
+  const { total:T, cedis, criticas, color, universo } = ESTADO.calc;
+  const fop = ESTADO.fechaOp, fsig = sumarDias(fop,1);
+  document.getElementById('selloCorte').textContent = 'Corte ' + ddMes(fsig) + '-' + fsig.slice(0,4);
+
+  if (!T.total){
+    document.getElementById('reporte').innerHTML =
+      `<div class="vacio" style="border:1px solid var(--linea);background:var(--panel);margin-top:30px">
+       No hay guías con fecha de servicio ${esc(fechaLarga(fop))}. Verifique el día comprometido en el control de arriba.</div>`;
+    return;
+  }
+
+  /* --- curva horaria --- */
+  const cnt = {};
+  universo.forEach(g => { if (!g.dia || !g.hora) return;
+    const k = g.dia + ' ' + g.hora.slice(0,2);
+    (cnt[k] = cnt[k] || {})[g.cedi] = ((cnt[k]||{})[g.cedi] || 0) + 1; });
+  const horas = [];
+  for (const d of [fop, fsig]) for (let h=0; h<24; h++) horas.push([d, String(h).padStart(2,'0')]);
+  const suma = k => Object.values(cnt[k[0]+' '+k[1]] || {}).reduce((a,b)=>a+b,0);
+  let fin = horas.length-1; while (fin > 24 && !suma(horas[fin])) fin--;
+  const visibles = horas.slice(0, Math.max(fin+2, 30));
+  const maxv = Math.max(1, ...visibles.map(suma));
+  const barras = visibles.map(([d,h]) => {
+    const tot = suma([d,h]), datos = cnt[d+' '+h] || {};
+    const seg = Object.keys(datos).reverse().map(c => {
+      const fuera = d > fop, ajus = fuera && ESTADO.ajustes.has(c);
+      const cls = ajus ? 'seg aj' : (fuera ? 'seg out' : 'seg');
+      const st = fuera ? '' : `background:${color[c]};`;
+      return `<i class="${cls}" style="height:${(100*datos[c]/tot).toFixed(2)}%;${st}" title="${esc(c)}: ${datos[c]}"></i>`;
+    }).join('');
+    const alto = Math.max(2, 100*tot/maxv);
+    const marca = (d === fsig && h === '00') ? ' data-corte="1"' : '';
+    return `<div class="col"${marca}><div class="val">${tot||''}</div>
+      <div class="bar" style="height:${alto.toFixed(1)}%">${seg}</div><div class="hh">${h}</div></div>`;
+  }).join('');
+  const pico = visibles.reduce((a,b) => suma(b) > suma(a) ? b : a, visibles[0]);
+  const nVis6 = visibles.filter(v => v[0] === fop).length;
+
+  /* --- tarjetas --- */
+  const tarjetas = cedis.map(c => {
+    const riesgo = c.fuera_sla - c.ajustadas + c.sin_cerrar;
+    const top = c.recursos[0] || {recurso:'—',fuera_sla:0,sin_cerrar:0};
+    const crit = c.recursos.filter(r => r.fuera_sla + r.sin_cerrar > 0);
+    const conc = riesgo ? `<div class="conc"><span class="k">Concentración</span>
+        <b>${crit.length}</b> de ${c.n_recursos} recursos explican el incumplimiento;
+        <b>${esc(top.recurso)}</b> aporta el <b>${Math.round(100*(top.fuera_sla+top.sin_cerrar)/riesgo)}%</b>.</div>` : '';
+    const ajuste = c.ajustadas ? `<div class="ajuste"><span class="tag">Ajuste autorizado</span>
+        ${c.ajustadas} guías cerradas el ${ddMes(fsig)} se reconocen dentro del día ${fop.slice(8,10)}
+        por novedad del recurso. Sin el ajuste, el cumplimiento del CEDI sería <b>${c.cumpl}%</b>.</div>` : '';
+    const filas = c.recursos.slice(0,6).map(r => `<tr><td class="mono">${esc(r.recurso)}</td>
+        <td class="num">${r.total}</td><td class="num">${r.en_sla}</td>
+        <td class="num ${r.fuera_sla?'bad':'dim'}">${r.fuera_sla||'-'}</td>
+        <td class="num ${r.sin_cerrar?'bad':'dim'}">${r.sin_cerrar||'-'}</td></tr>`).join('');
+    return `<article class="cedi ${riesgo?'alerta':''}" style="border-top-color:${riesgo?'var(--alarma)':color[c.cedi]}">
+      <header><h3>${esc(c.cedi)}</h3>
+        <div class="grande"><span>${c.cumpl_aj}</span><em>%</em></div>
+        <p class="sub">cumplimiento de fecha comprometida</p></header>
+      <div class="barra" style="--p:${c.cumpl}%;--pa:${c.cumpl_aj}%"></div>
+      <ul class="cifras">
+        <li><b>${c.total}</b><span>guías en responsabilidad</span></li>
+        <li><b>${c.en_sla_aj}</b><span>cerradas dentro del día</span></li>
+        <li class="${c.fuera_sla-c.ajustadas?'bad':''}"><b>${c.fuera_sla-c.ajustadas}</b><span>fuera de SLA</span></li>
+        <li class="${c.sin_cerrar?'bad':''}"><b>${c.sin_cerrar}</b><span>sin cierre</span></li>
+      </ul>${ajuste}${conc}
+      <table class="mini"><thead><tr><th>Recurso</th><th class="num">Guías</th><th class="num">En día</th>
+        <th class="num">Fuera</th><th class="num">Abiertas</th></tr></thead><tbody>${filas}</tbody></table>
+      <footer class="pie">${c.n_recursos} recursos · ${c.canceladas} canceladas excluidas ·
+        efectividad de entrega ${c.efectividad}%</footer></article>`;
+  }).join('');
+
+  /* --- tabla de gestión --- */
+  const etiqueta = g => g.ajustada ? ['Ajustada','et-aj']
+                     : g.clase === 'fuera_sla' ? ['Fuera de SLA','et-out'] : ['Sin cierre','et-open'];
+  const filasCrit = criticas.map(g => {
+    const [et,cls] = etiqueta(g);
+    return `<tr data-f="${cls}"><td class="mono">${esc(g.guia)}</td><td>${esc(g.cedi)}</td>
+      <td>${esc(g.ciudad)}</td><td class="mono">${esc(g.recurso)}</td><td>${esc(g.estado)}</td>
+      <td>${esc(g.novedad || 'Sin cierre')}</td>
+      <td class="mono">${g.dia ? ddMes(g.dia)+' '+g.hora : '—'}</td>
+      <td><span class="et ${cls}">${et}</span></td><td class="dir">${esc(g.dir)}</td></tr>`;
+  }).join('');
+  const nOut = criticas.filter(g => g.clase==='fuera_sla' && !g.ajustada).length;
+  const nOpen = criticas.filter(g => g.clase==='sin_cerrar').length;
+  const nAj = criticas.filter(g => g.ajustada).length;
+
+  /* --- novedades y ciudades --- */
+  const maxn = Math.max(1, ...T.novedades.map(n => n[1]));
+  const novHtml = T.novedades.map(([k,v]) => `<li><span>${esc(k)}</span>
+    <span class="track"><i style="width:${Math.round(100*v/maxn)}%"></i></span><b>${v}</b></li>`).join('')
+    || '<li><span class="dim">Sin novedades registradas</span></li>';
+  const principales = new Set(cedis.map(c => sinTildes(c.cedi).toLowerCase()));
+  const perif = T.ciudades.filter(([c]) => !principales.has(sinTildes(c).toLowerCase()));
+  const ciudHtml = perif.length
+    ? perif.map(([k,v]) => `${esc(k)} <b>${v}</b>`).join(' · ')
+    : '<span class="dim">Toda la operación del día se ejecutó en las ciudades sede de los CEDI.</span>';
+
+  const riesgoTotal = T.fuera_sla - T.ajustadas + T.sin_cerrar;
+  const lider = cedis[0];
+
+  document.getElementById('reporte').innerHTML = `
+  <div class="kpis">
+    <div class="kpi"><b>${T.total}</b><span>Guías en responsabilidad</span>
+      <small>${T.canceladas} canceladas excluidas</small></div>
+    <div class="kpi oro"><b>${T.cumpl_aj}%</b><span>Cumplimiento del día</span>
+      <small>${T.ajustadas ? T.cumpl+'% sin los ajustes autorizados' : 'sobre fecha comprometida'}</small></div>
+    <div class="kpi rojo"><b>${T.fuera_sla-T.ajustadas}</b><span>Fuera de SLA</span>
+      <small>cerradas después de medianoche</small></div>
+    <div class="kpi gris"><b>${T.sin_cerrar}</b><span>Sin cierre</span><small>siguen abiertas al corte</small></div>
+    <div class="kpi"><b>${T.efectividad}%</b><span>Efectividad de entrega</span>
+      <small>${T.entregadas} entregadas al destinatario</small></div>
+  </div>
+
+  <section>
+    <h2>La línea de corte</h2>
+    <p class="lead">Cada barra es una hora de cierre real. El pico del día se dio a las
+      <b>${pico[1]}:00 del ${ddMes(pico[0])}</b>; lo que cruza la medianoche cambia de color y es exactamente
+      el incumplimiento del día.${T.ajustadas ? ' El bloque rayado corresponde a los cierres reconocidos dentro del día por novedad del recurso.' : ''}</p>
+    <div class="corte">
+      <div class="grafo">${barras}</div>
+      <div class="dias"><span class="d6" style="flex:${nVis6}">${esc(fechaLarga(fop))} — día comprometido</span>
+        <span class="d7" style="flex:${visibles.length-nVis6}">${esc(fechaLarga(fsig))} — fuera de SLA</span></div>
+      <div class="leyenda">
+        ${cedis.map(c => `<span><i style="background:${color[c.cedi]}"></i>${esc(c.cedi)}</span>`).join('')}
+        <span><i style="background:var(--alarma)"></i>Cierre del ${ddMes(fsig)} — fuera de SLA</span>
+        ${T.ajustadas ? '<span><i style="background:repeating-linear-gradient(135deg,var(--alarma) 0 4px,#8f2317 4px 8px)"></i>Ajuste autorizado</span>' : ''}
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Desempeño por CEDI</h2>
+    <p class="lead"><b>${esc(lider.cedi)}</b> concentra el ${Math.round(100*lider.total/T.total)}% del volumen del día.
+      ${riesgoTotal ? 'El riesgo abierto se detalla en cada tarjeta con el recurso que lo explica.'
+                    : 'Ningún CEDI presenta guías fuera de SLA ni abiertas al corte.'}</p>
+    <div class="grid">${tarjetas}</div>
+  </section>
+
+  <section>
+    <h2>Guías en gestión</h2>
+    <p class="lead">${riesgoTotal
+        ? `<b>${riesgoTotal} guías</b> requieren gestión inmediata: ${nOut} cerradas fuera de SLA y ${nOpen} todavía abiertas.`
+        : '<b>Sin guías en gestión:</b> el día cerró completo dentro de la fecha comprometida.'}
+      ${nAj ? ` Se listan también las ${nAj} cubiertas por el ajuste autorizado, para trazabilidad.` : ''}</p>
+    <div class="filtros">
+      <button data-f="todo" aria-pressed="true">Todas (${criticas.length})</button>
+      <button data-f="et-out" aria-pressed="false">Fuera de SLA (${nOut+nAj})</button>
+      <button data-f="et-open" aria-pressed="false">Sin cierre (${nOpen})</button>
+      ${nAj ? `<button data-f="et-aj" aria-pressed="false">Ajuste autorizado (${nAj})</button>` : ''}
+    </div>
+    <div class="tabla">
+      ${criticas.length ? `<table><thead><tr><th>Guía</th><th>CEDI</th><th>Ciudad</th><th>Recurso</th>
+        <th>Estado</th><th>Novedad</th><th>Cierre</th><th>Clasificación</th><th>Dirección</th></tr></thead>
+        <tbody id="cuerpo">${filasCrit}</tbody></table>`
+        : '<div class="vacio">No hay guías fuera de SLA ni abiertas en este corte.</div>'}
+    </div>
+  </section>
+
+  <section class="dos">
+    <div class="caja"><h3>Motivos de no entrega</h3><ul class="novs">${novHtml}</ul></div>
+    <div class="caja"><h3>Cobertura periférica</h3>
+      <p class="lead" style="margin-bottom:14px">Municipios atendidos por fuera de las ciudades sede:</p>
+      <p class="ciud">${ciudHtml}</p></div>
+  </section>
+
+  <div class="nota"><b>Criterio de lectura</b>
+    <ol>
+      <li>Universo: ${T.total} guías con fecha de servicio ${esc(fechaLarga(fop))}; se excluyen ${T.canceladas}
+        canceladas por no corresponder a responsabilidad de la operación.</li>
+      <li>Cumple quien registra cierre dentro del día comprometido. Cierre con fecha posterior se clasifica
+        fuera de SLA; sin registro de cierre se clasifica abierta.</li>
+      ${T.ajustadas ? `<li>Ajuste autorizado: ${T.ajustadas} cierres del ${ddMes(fsig)} en
+        ${[...ESTADO.ajustes].map(esc).join(', ')} se reconocen dentro del día por novedad del recurso,
+        y se reportan de forma visible para no perder trazabilidad.</li>` : ''}
+      <li>Efectividad de entrega mide guías con novedad «Entregado» sobre el universo; es un indicador distinto
+        al de cumplimiento de fecha.</li>
+    </ol>
+  </div>
+
+  <div class="pie-doc"><span>Fuente: SmartQuick — ${esc(ESTADO.nombreArchivo || 'export de servicios')}</span>
+    <span>Procesado en el navegador el ${new Date().toLocaleString('es-CO')}</span>
+    <span>Quick Help Courier S.A.S.</span></div>`;
+
+  document.querySelectorAll('.filtros button').forEach(b => b.addEventListener('click', () => {
+    document.querySelectorAll('.filtros button').forEach(x => x.setAttribute('aria-pressed','false'));
+    b.setAttribute('aria-pressed','true');
+    const f = b.dataset.f;
+    document.querySelectorAll('#cuerpo tr').forEach(tr => {
+      const v = f === 'todo' || tr.dataset.f === f || (f === 'et-out' && tr.dataset.f === 'et-aj');
+      tr.style.display = v ? '' : 'none';
+    });
+  }));
+}
+
+/* ---------------- exportar ---------------- */
+function exportarCsv(){
+  if (!ESTADO.calc) return;
+  const cab = ['Guia','CEDI','Ciudad','Recurso','Estado','Novedad','Fecha cierre','Hora cierre','Clasificacion','Direccion'];
+  const filas = ESTADO.calc.criticas.map(g => [
+    g.guia, g.cedi, g.ciudad, g.recurso, g.estado, g.novedad || 'Sin cierre', g.dia || '', g.hora || '',
+    g.ajustada ? 'Ajuste autorizado' : (g.clase === 'fuera_sla' ? 'Fuera de SLA' : 'Sin cierre'), g.dir
+  ]);
+  const csv = '\uFEFF' + [cab, ...filas]
+    .map(f => f.map(v => `"${String(v==null?'':v).replace(/"/g,'""')}"`).join(';')).join('\r\n');
+  const url = URL.createObjectURL(new Blob([csv], { type:'text/csv;charset=utf-8;' }));
+  const a = Object.assign(document.createElement('a'),
+    { href:url, download:`guias_en_gestion_${ESTADO.fechaOp}.csv` });
+  document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+}
+
+/* ---------------- modo automático (opcional, para N8N) ----------------
+   Si el repositorio tiene data/servicios.csv, la página lo carga sola. */
+(async function auto(){
+  try{
+    const r = await fetch('data/servicios.csv?t=' + Date.now(), { cache:'no-store' });
+    if (!r.ok) return;
+    const texto = await r.text();
+    if (!texto.trim()) return;
+    ESTADO.nombreArchivo = 'data/servicios.csv (automático)';
+    recibirFilas(parseCSV(texto));
+  }catch(e){ /* sin archivo automático: queda el cargue manual */ }
+})();
+</script>
+</body>
+</html>
