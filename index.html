@@ -17,7 +17,7 @@
 html{-webkit-text-size-adjust:100%}
 body{background:var(--tinta);color:var(--hueso);font-family:'Space Grotesk',ui-sans-serif,system-ui,sans-serif;
   font-size:17px;line-height:1.5;min-height:100vh}
-h1,h2,h3,.grande,.kpi b,.hh,.cifras b,.novs b{font-family:'Barlow Condensed','Arial Narrow',sans-serif;letter-spacing:.01em}
+h1,h2,h3,.grande,.kpi b,.cifras b,.novs b{font-family:'Barlow Condensed','Arial Narrow',sans-serif;letter-spacing:.01em}
 .wrap{max-width:1500px;margin:0 auto;padding:0 32px 80px}
 .mono{font-variant-numeric:tabular-nums;letter-spacing:.02em}
 .num{text-align:right;font-variant-numeric:tabular-nums}
@@ -80,28 +80,6 @@ section{margin:0 0 64px}
 h2{font-size:15px;letter-spacing:.24em;text-transform:uppercase;color:var(--oro);margin-bottom:6px;font-weight:600}
 .lead{margin-bottom:26px;color:var(--tenue);max-width:82ch;font-size:18px}
 .lead b{color:var(--hueso);font-weight:500}
-
-/* ---------- linea de corte ---------- */
-.corte{background:var(--panel);border:1px solid var(--linea);padding:28px 24px 16px}
-.grafo{display:flex;align-items:flex-end;gap:3px;height:280px;overflow-x:auto;padding-bottom:4px}
-.col{flex:1 1 0;min-width:16px;height:100%;display:flex;flex-direction:column;justify-content:flex-end;position:relative}
-.col[data-corte]::before{content:"";position:absolute;left:-3px;top:0;bottom:22px;width:2px;
-  background:repeating-linear-gradient(180deg,var(--alarma) 0 7px,transparent 7px 13px)}
-.col[data-corte]::after{content:"CORTE 00:00";position:absolute;left:6px;top:1px;font-size:12px;
-  letter-spacing:.16em;color:var(--alarma);white-space:nowrap}
-.val{font-size:12px;color:var(--tenue);text-align:center;height:15px}
-.bar{display:flex;flex-direction:column;width:100%}
-.seg{display:block;width:100%}
-.seg.out{background:var(--alarma)}
-.seg.aj{background:repeating-linear-gradient(135deg,var(--alarma) 0 4px,#8f2317 4px 8px)}
-.hh{font-size:13px;color:var(--tenue);text-align:center;padding-top:7px;font-variant-numeric:tabular-nums}
-.dias{display:flex;border-top:1px solid var(--linea);margin-top:2px;font-size:13px;letter-spacing:.18em;
-  text-transform:uppercase;color:var(--tenue)}
-.dias span{padding:10px 0}
-.dias .d6{flex:24;border-right:1px solid var(--linea)}
-.dias .d7{flex:24;padding-left:12px;color:var(--alarma)}
-.leyenda{display:flex;flex-wrap:wrap;gap:22px;margin-top:18px;font-size:14px;color:var(--tenue)}
-.leyenda i{display:inline-block;width:16px;height:10px;margin-right:8px;vertical-align:middle}
 
 /* ---------- tarjetas cedi ---------- */
 .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(360px,1fr));gap:20px}
@@ -176,7 +154,7 @@ table{width:100%;border-collapse:collapse}
 
 @media (max-width:900px){
   .wrap{padding:0 18px 60px} .dos{grid-template-columns:1fr} .kpi b{font-size:48px}
-  .grafo{height:220px} .eyebrow{letter-spacing:.12em;font-size:12px} .acciones{margin-left:0}
+  .eyebrow{letter-spacing:.12em;font-size:12px} .acciones{margin-left:0}
 }
 @media print{
   body{background:#fff;color:#000} .cargue,.control,.filtros{display:none!important}
@@ -492,33 +470,6 @@ function render(){
     return;
   }
 
-  /* --- curva horaria --- */
-  const cnt = {};
-  universo.forEach(g => { if (!g.dia || !g.hora) return;
-    const k = g.dia + ' ' + g.hora.slice(0,2);
-    (cnt[k] = cnt[k] || {})[g.cedi] = ((cnt[k]||{})[g.cedi] || 0) + 1; });
-  const horas = [];
-  for (const d of [fop, fsig]) for (let h=0; h<24; h++) horas.push([d, String(h).padStart(2,'0')]);
-  const suma = k => Object.values(cnt[k[0]+' '+k[1]] || {}).reduce((a,b)=>a+b,0);
-  let fin = horas.length-1; while (fin > 24 && !suma(horas[fin])) fin--;
-  const visibles = horas.slice(0, Math.max(fin+2, 30));
-  const maxv = Math.max(1, ...visibles.map(suma));
-  const barras = visibles.map(([d,h]) => {
-    const tot = suma([d,h]), datos = cnt[d+' '+h] || {};
-    const seg = Object.keys(datos).reverse().map(c => {
-      const fuera = d > fop, ajus = fuera && ESTADO.ajustes.has(c);
-      const cls = ajus ? 'seg aj' : (fuera ? 'seg out' : 'seg');
-      const st = fuera ? '' : `background:${color[c]};`;
-      return `<i class="${cls}" style="height:${(100*datos[c]/tot).toFixed(2)}%;${st}" title="${esc(c)}: ${datos[c]}"></i>`;
-    }).join('');
-    const alto = Math.max(2, 100*tot/maxv);
-    const marca = (d === fsig && h === '00') ? ' data-corte="1"' : '';
-    return `<div class="col"${marca}><div class="val">${tot||''}</div>
-      <div class="bar" style="height:${alto.toFixed(1)}%">${seg}</div><div class="hh">${h}</div></div>`;
-  }).join('');
-  const pico = visibles.reduce((a,b) => suma(b) > suma(a) ? b : a, visibles[0]);
-  const nVis6 = visibles.filter(v => v[0] === fop).length;
-
   /* --- tarjetas --- */
   const tarjetas = cedis.map(c => {
     const riesgo = c.fuera_sla - c.ajustadas + c.sin_cerrar;
@@ -592,23 +543,6 @@ function render(){
     <div class="kpi"><b>${T.efectividad}%</b><span>Efectividad de entrega</span>
       <small>${T.entregadas} entregadas al destinatario</small></div>
   </div>
-
-  <section>
-    <h2>La línea de corte</h2>
-    <p class="lead">Cada barra es una hora de cierre real. El pico del día se dio a las
-      <b>${pico[1]}:00 del ${ddMes(pico[0])}</b>; lo que cruza la medianoche cambia de color y es exactamente
-      el incumplimiento del día.${T.ajustadas ? ' El bloque rayado corresponde a los cierres reconocidos dentro del día por novedad del recurso.' : ''}</p>
-    <div class="corte">
-      <div class="grafo">${barras}</div>
-      <div class="dias"><span class="d6" style="flex:${nVis6}">${esc(fechaLarga(fop))} — día comprometido</span>
-        <span class="d7" style="flex:${visibles.length-nVis6}">${esc(fechaLarga(fsig))} — fuera de SLA</span></div>
-      <div class="leyenda">
-        ${cedis.map(c => `<span><i style="background:${color[c.cedi]}"></i>${esc(c.cedi)}</span>`).join('')}
-        <span><i style="background:var(--alarma)"></i>Cierre del ${ddMes(fsig)} — fuera de SLA</span>
-        ${T.ajustadas ? '<span><i style="background:repeating-linear-gradient(135deg,var(--alarma) 0 4px,#8f2317 4px 8px)"></i>Ajuste autorizado</span>' : ''}
-      </div>
-    </div>
-  </section>
 
   <section>
     <h2>Desempeño por CEDI</h2>
