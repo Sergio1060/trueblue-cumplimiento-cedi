@@ -74,6 +74,7 @@ h1 em{font-style:normal;color:var(--oro)}
 .kpi b{display:block;font-size:64px;line-height:.9;font-weight:600}
 .kpi span{display:block;color:var(--tenue);font-size:15px;margin-top:8px;text-transform:uppercase;letter-spacing:.1em}
 .kpi.oro b{color:var(--oro)} .kpi.rojo b{color:var(--alarma)} .kpi.gris b{color:var(--abierta)}
+.kpi.fuera b{color:#5F6570} .kpi.fuera span{color:#6E727A}
 .kpi small{display:block;color:var(--tenue);font-size:14px;margin-top:6px}
 
 section{margin:0 0 64px}
@@ -100,14 +101,16 @@ h2{font-size:15px;letter-spacing:.24em;text-transform:uppercase;color:var(--oro)
 .cifras b{display:block;font-size:28px;font-weight:600}
 .cifras li.bad b{color:var(--alarma)}
 .cifras span{font-size:13px;color:var(--tenue);line-height:1.3;display:block}
-.ajuste,.conc{background:var(--panel2);border-left:2px solid var(--oro2);padding:12px 14px;font-size:14.5px;
+.ajuste,.conc,.excl{background:var(--panel2);border-left:2px solid var(--oro2);padding:12px 14px;font-size:14.5px;
   color:var(--tenue);margin-bottom:14px}
+.excl{border-left-color:#4A4E56}
 .conc{border-left-color:var(--alarma)}
 .ajuste b,.conc b{color:var(--hueso)}
 .tag,.conc .k{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;
   padding:3px 7px;margin-right:8px}
 .tag{background:var(--oro2);color:#1a1200}
 .conc .k{background:var(--alarma);color:#210603}
+.excl .k{background:#4A4E56;color:#E9E9E4}
 table{width:100%;border-collapse:collapse}
 .mini{font-size:14.5px}
 .mini th{text-align:left;color:var(--tenue);font-weight:500;font-size:12px;letter-spacing:.12em;
@@ -132,6 +135,7 @@ table{width:100%;border-collapse:collapse}
 .et-out{background:var(--alarma);color:#210603}
 .et-open{background:var(--abierta);color:#0C1116}
 .et-aj{background:#3A3A20;color:var(--oro);border:1px solid #5c5a2a}
+.et-canc{background:transparent;color:#7E838C;border:1px solid #4A4E56}
 .vacio{padding:30px;text-align:center;color:var(--tenue)}
 
 /* ---------- cierre ---------- */
@@ -174,8 +178,8 @@ table{width:100%;border-collapse:collapse}
   </div>
   <h1>Fecha comprometida <em>vs.</em> fecha de cierre</h1>
   <p class="bajada">Cumplimiento por CEDI del día de operación. Cumple lo que cierra dentro del día comprometido;
-  lo que cruza la medianoche queda fuera de SLA. Las guías canceladas salen del universo porque no son
-  responsabilidad de la operación.</p>
+  lo que cruza la medianoche queda fuera de SLA. Las guías canceladas se muestran aparte: quedan a la vista
+  para trazabilidad, pero no entran al indicador porque no son responsabilidad de la operación.</p>
 </header>
 
 <div class="cargue">
@@ -334,6 +338,7 @@ function recibirFilas(filas){
     recurso: busca('recurso','placa'),
     novedad: busca('novedad'),
     desc:    busca('descripcion de novedad'),
+    canc:    busca('cancelado','fecha cancelado'),
     dir:     busca('direccion'),
     tipo:    busca('tipo de servicio')
   };
@@ -342,11 +347,14 @@ function recibirFilas(filas){
   }
   ESTADO.filas = filas.map(r => {
     const f = partirFecha(r[C.fecha]), fin = partirFecha(r[C.fin]);
+    const can = partirFecha(C.canc ? r[C.canc] : '');
     return {
       guia:    limpiar(C.guia ? r[C.guia] : ''),
       fecha:   f.dia,
       dia:     fin.dia,
       hora:    fin.hora,
+      canDia:  can.dia,
+      canHora: can.hora,
       cedi:    nombreCedi(C.cedi ? r[C.cedi] : (C.ciudad ? r[C.ciudad] : 'Sin CEDI')),
       ciudad:  titulo(C.ciudad ? r[C.ciudad] : ''),
       estado:  titulo(C.estado ? r[C.estado] : ''),
@@ -406,11 +414,12 @@ function pintarChips(){
 /* ---------------- cálculo ---------------- */
 function calcularYRender(){
   const fop = ESTADO.fechaOp;
-  const universo = [], canceladas = {};
+  const universo = [], canceladas = {}, cancFilas = [];
   ESTADO.filas.forEach(r => {
     if (r.fecha && r.fecha !== fop) return;                 // solo el día evaluado
     if (sinTildes(r.estado).toLowerCase() === 'cancelado'){  // fuera del universo
-      canceladas[r.cedi] = (canceladas[r.cedi]||0)+1; return;
+      canceladas[r.cedi] = (canceladas[r.cedi]||0)+1;
+      cancFilas.push({ ...r, clase:'cancelada', ajustada:false, claseAj:'cancelada' }); return;
     }
     let clase = 'sin_cerrar';
     if (r.dia) clase = r.dia > fop ? 'fuera_sla' : 'en_sla';
@@ -447,8 +456,10 @@ function calcularYRender(){
     .sort((a,b) => universo.filter(g=>g.cedi===b).length - universo.filter(g=>g.cedi===a).length);
   const total = bloque(universo, 'Nacional');
   total.canceladas = Object.values(canceladas).reduce((a,b)=>a+b,0);
+  cancFilas.sort((a,b) => a.cedi.localeCompare(b.cedi) || (a.canDia||'').localeCompare(b.canDia||'')
+                       || a.guia.localeCompare(b.guia));
   ESTADO.calc = {
-    universo, total, color: Object.fromEntries(nombres.map((n,i)=>[n, PALETA[i%PALETA.length]])),
+    universo, total, cancFilas, color: Object.fromEntries(nombres.map((n,i)=>[n, PALETA[i%PALETA.length]])),
     cedis: nombres.map(n => bloque(universo.filter(g => g.cedi === n), n)),
     criticas: universo.filter(g => g.clase !== 'en_sla')
       .sort((a,b) => a.cedi.localeCompare(b.cedi) || a.clase.localeCompare(b.clase)
@@ -459,7 +470,7 @@ function calcularYRender(){
 
 /* ---------------- render ---------------- */
 function render(){
-  const { total:T, cedis, criticas, color, universo } = ESTADO.calc;
+  const { total:T, cedis, criticas, cancFilas, color, universo } = ESTADO.calc;
   const fop = ESTADO.fechaOp, fsig = sumarDias(fop,1);
   document.getElementById('selloCorte').textContent = 'Corte ' + ddMes(fsig) + '-' + fsig.slice(0,4);
 
@@ -498,19 +509,26 @@ function render(){
       </ul>${ajuste}${conc}
       <table class="mini"><thead><tr><th>Recurso</th><th class="num">Guías</th><th class="num">En día</th>
         <th class="num">Fuera</th><th class="num">Abiertas</th></tr></thead><tbody>${filas}</tbody></table>
-      <footer class="pie">${c.n_recursos} recursos · ${c.canceladas} canceladas excluidas ·
-        efectividad de entrega ${c.efectividad}%</footer></article>`;
+      ${c.canceladas ? `<div class="excl"><span class="k">Fuera del indicador</span>
+        ${c.canceladas} guías canceladas por el cliente. No suman ni restan al cumplimiento del CEDI;
+        quedan listadas para trazabilidad.</div>` : ''}
+      <footer class="pie">${c.n_recursos} recursos · efectividad de entrega ${c.efectividad}%</footer></article>`;
   }).join('');
 
   /* --- tabla de gestión --- */
-  const etiqueta = g => g.ajustada ? ['Ajustada','et-aj']
+  const etiqueta = g => g.clase === 'cancelada' ? ['Cancelada','et-canc']
+                     : g.ajustada ? ['Ajustada','et-aj']
                      : g.clase === 'fuera_sla' ? ['Fuera de SLA','et-out'] : ['Sin cierre','et-open'];
-  const filasCrit = criticas.map(g => {
+  const listado = criticas.concat(cancFilas);
+  const filasCrit = listado.map(g => {
     const [et,cls] = etiqueta(g);
+    const marca = g.clase === 'cancelada'
+      ? (g.canDia ? ddMes(g.canDia)+' '+g.canHora : '—')
+      : (g.dia ? ddMes(g.dia)+' '+g.hora : '—');
     return `<tr data-f="${cls}"><td class="mono">${esc(g.guia)}</td><td>${esc(g.cedi)}</td>
-      <td>${esc(g.ciudad)}</td><td class="mono">${esc(g.recurso)}</td><td>${esc(g.estado)}</td>
-      <td>${esc(g.novedad || 'Sin cierre')}</td>
-      <td class="mono">${g.dia ? ddMes(g.dia)+' '+g.hora : '—'}</td>
+      <td>${esc(g.ciudad)}</td><td class="mono">${esc(g.recurso || '—')}</td><td>${esc(g.estado)}</td>
+      <td>${esc(g.novedad || (g.clase === 'cancelada' ? 'Cancelada por el cliente' : 'Sin cierre'))}</td>
+      <td class="mono">${marca}</td>
       <td><span class="et ${cls}">${et}</span></td><td class="dir">${esc(g.dir)}</td></tr>`;
   }).join('');
   const nOut = criticas.filter(g => g.clase==='fuera_sla' && !g.ajustada).length;
@@ -534,7 +552,7 @@ function render(){
   document.getElementById('reporte').innerHTML = `
   <div class="kpis">
     <div class="kpi"><b>${T.total}</b><span>Guías en responsabilidad</span>
-      <small>${T.canceladas} canceladas excluidas</small></div>
+      <small>base del indicador de cumplimiento</small></div>
     <div class="kpi oro"><b>${T.cumpl_aj}%</b><span>Cumplimiento del día</span>
       <small>${T.ajustadas ? T.cumpl+'% sin los ajustes autorizados' : 'sobre fecha comprometida'}</small></div>
     <div class="kpi rojo"><b>${T.fuera_sla-T.ajustadas}</b><span>Fuera de SLA</span>
@@ -542,6 +560,8 @@ function render(){
     <div class="kpi gris"><b>${T.sin_cerrar}</b><span>Sin cierre</span><small>siguen abiertas al corte</small></div>
     <div class="kpi"><b>${T.efectividad}%</b><span>Efectividad de entrega</span>
       <small>${T.entregadas} entregadas al destinatario</small></div>
+    <div class="kpi fuera"><b>${T.canceladas}</b><span>Canceladas</span>
+      <small>no computan: cancelación del cliente</small></div>
   </div>
 
   <section>
@@ -557,18 +577,20 @@ function render(){
     <p class="lead">${riesgoTotal
         ? `<b>${riesgoTotal} guías</b> requieren gestión inmediata: ${nOut} cerradas fuera de SLA y ${nOpen} todavía abiertas.`
         : '<b>Sin guías en gestión:</b> el día cerró completo dentro de la fecha comprometida.'}
-      ${nAj ? ` Se listan también las ${nAj} cubiertas por el ajuste autorizado, para trazabilidad.` : ''}</p>
+      ${nAj ? ` Se listan también las ${nAj} cubiertas por el ajuste autorizado.` : ''}
+      ${T.canceladas ? ` Aparte, ${T.canceladas} guías canceladas por el cliente quedan listadas para trazabilidad, sin entrar al indicador.` : ''}</p>
     <div class="filtros">
-      <button data-f="todo" aria-pressed="true">Todas (${criticas.length})</button>
+      <button data-f="todo" aria-pressed="true">Todas (${listado.length})</button>
       <button data-f="et-out" aria-pressed="false">Fuera de SLA (${nOut+nAj})</button>
       <button data-f="et-open" aria-pressed="false">Sin cierre (${nOpen})</button>
       ${nAj ? `<button data-f="et-aj" aria-pressed="false">Ajuste autorizado (${nAj})</button>` : ''}
+      ${T.canceladas ? `<button data-f="et-canc" aria-pressed="false">Canceladas (${T.canceladas})</button>` : ''}
     </div>
     <div class="tabla">
-      ${criticas.length ? `<table><thead><tr><th>Guía</th><th>CEDI</th><th>Ciudad</th><th>Recurso</th>
+      ${listado.length ? `<table><thead><tr><th>Guía</th><th>CEDI</th><th>Ciudad</th><th>Recurso</th>
         <th>Estado</th><th>Novedad</th><th>Cierre</th><th>Clasificación</th><th>Dirección</th></tr></thead>
         <tbody id="cuerpo">${filasCrit}</tbody></table>`
-        : '<div class="vacio">No hay guías fuera de SLA ni abiertas en este corte.</div>'}
+        : '<div class="vacio">No hay guías fuera de SLA, abiertas ni canceladas en este corte.</div>'}
     </div>
   </section>
 
@@ -581,8 +603,9 @@ function render(){
 
   <div class="nota"><b>Criterio de lectura</b>
     <ol>
-      <li>Universo: ${T.total} guías con fecha de servicio ${esc(fechaLarga(fop))}; se excluyen ${T.canceladas}
-        canceladas por no corresponder a responsabilidad de la operación.</li>
+      <li>Universo del indicador: ${T.total} guías con fecha de servicio ${esc(fechaLarga(fop))}.
+        Las ${T.canceladas} canceladas se listan y se cuentan aparte, pero no entran al cálculo del
+        cumplimiento por no corresponder a responsabilidad de la operación.</li>
       <li>Cumple quien registra cierre dentro del día comprometido. Cierre con fecha posterior se clasifica
         fuera de SLA; sin registro de cierre se clasifica abierta.</li>
       ${T.ajustadas ? `<li>Ajuste autorizado: ${T.ajustadas} cierres del ${ddMes(fsig)} en
@@ -611,10 +634,16 @@ function render(){
 /* ---------------- exportar ---------------- */
 function exportarCsv(){
   if (!ESTADO.calc) return;
-  const cab = ['Guia','CEDI','Ciudad','Recurso','Estado','Novedad','Fecha cierre','Hora cierre','Clasificacion','Direccion'];
-  const filas = ESTADO.calc.criticas.map(g => [
-    g.guia, g.cedi, g.ciudad, g.recurso, g.estado, g.novedad || 'Sin cierre', g.dia || '', g.hora || '',
-    g.ajustada ? 'Ajuste autorizado' : (g.clase === 'fuera_sla' ? 'Fuera de SLA' : 'Sin cierre'), g.dir
+  const cab = ['Guia','CEDI','Ciudad','Recurso','Estado','Novedad','Fecha cierre o cancelacion','Hora','Clasificacion','Direccion'];
+  const clasif = g => g.clase === 'cancelada' ? 'Cancelada (fuera del indicador)'
+                    : g.ajustada ? 'Ajuste autorizado'
+                    : g.clase === 'fuera_sla' ? 'Fuera de SLA' : 'Sin cierre';
+  const filas = ESTADO.calc.criticas.concat(ESTADO.calc.cancFilas).map(g => [
+    g.guia, g.cedi, g.ciudad, g.recurso, g.estado,
+    g.novedad || (g.clase === 'cancelada' ? 'Cancelada por el cliente' : 'Sin cierre'),
+    g.clase === 'cancelada' ? (g.canDia || '') : (g.dia || ''),
+    g.clase === 'cancelada' ? (g.canHora || '') : (g.hora || ''),
+    clasif(g), g.dir
   ]);
   const csv = '\uFEFF' + [cab, ...filas]
     .map(f => f.map(v => `"${String(v==null?'':v).replace(/"/g,'""')}"`).join(';')).join('\r\n');
