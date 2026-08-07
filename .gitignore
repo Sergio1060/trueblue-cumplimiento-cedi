@@ -1,0 +1,5 @@
+# Los CSV de SmartQuick llevan datos del destinatario: no se publican.
+entradas/
+*.csv
+!data/servicios.csv.ejemplo
+.DS_Store
