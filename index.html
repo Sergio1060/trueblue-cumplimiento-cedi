@@ -73,7 +73,7 @@ h1 em{font-style:normal;color:var(--oro)}
 .kpi{background:var(--panel);padding:22px 24px 20px}
 .kpi b{display:block;font-size:64px;line-height:.9;font-weight:600}
 .kpi span{display:block;color:var(--tenue);font-size:15px;margin-top:8px;text-transform:uppercase;letter-spacing:.1em}
-.kpi.oro b{color:var(--oro)} .kpi.rojo b{color:var(--alarma)} .kpi.gris b{color:var(--abierta)}
+.kpi.oro b,.kpi.oro2 b{color:var(--oro)} .kpi.rojo b{color:var(--alarma)} .kpi.gris b{color:var(--abierta)}
 .kpi.fuera b{color:#5F6570} .kpi.fuera span{color:#6E727A}
 .kpi small{display:block;color:var(--tenue);font-size:14px;margin-top:6px}
 
@@ -178,7 +178,7 @@ table{width:100%;border-collapse:collapse}
   </div>
   <h1>Fecha comprometida <em>vs.</em> fecha de cierre</h1>
   <p class="bajada">Cumplimiento por CEDI del día de operación. Cumple lo que cierra dentro del día comprometido;
-  lo que cruza la medianoche queda fuera de SLA. Las guías canceladas se muestran aparte: quedan a la vista
+  lo que cruza la medianoche queda fuera de tiempo. Las guías canceladas se muestran aparte: quedan a la vista
   para trazabilidad, pero no entran al indicador porque no son responsabilidad de la operación.</p>
 </header>
 
@@ -502,13 +502,13 @@ function render(){
         <p class="sub">cumplimiento de fecha comprometida</p></header>
       <div class="barra" style="--p:${c.cumpl}%;--pa:${c.cumpl_aj}%"></div>
       <ul class="cifras">
-        <li><b>${c.total}</b><span>guías en responsabilidad</span></li>
-        <li><b>${c.en_sla_aj}</b><span>cerradas dentro del día</span></li>
-        <li class="${c.fuera_sla-c.ajustadas?'bad':''}"><b>${c.fuera_sla-c.ajustadas}</b><span>fuera de SLA</span></li>
-        <li class="${c.sin_cerrar?'bad':''}"><b>${c.sin_cerrar}</b><span>sin cierre</span></li>
+        <li><b>${c.en_sla_aj}</b><span>entregadas a tiempo</span></li>
+        <li class="${c.fuera_sla-c.ajustadas?'bad':''}"><b>${c.fuera_sla-c.ajustadas}</b><span>entregadas fuera de tiempo</span></li>
+        <li class="${c.sin_cerrar?'bad':''}"><b>${c.sin_cerrar}</b><span>pendientes</span></li>
+        <li><b>${c.total}</b><span>guías del día</span></li>
       </ul>${ajuste}${conc}
-      <table class="mini"><thead><tr><th>Recurso</th><th class="num">Guías</th><th class="num">En día</th>
-        <th class="num">Fuera</th><th class="num">Abiertas</th></tr></thead><tbody>${filas}</tbody></table>
+      <table class="mini"><thead><tr><th>Recurso</th><th class="num">Guías</th><th class="num">A tiempo</th>
+        <th class="num">Fuera</th><th class="num">Pendientes</th></tr></thead><tbody>${filas}</tbody></table>
       ${c.canceladas ? `<div class="excl"><span class="k">Fuera del indicador</span>
         ${c.canceladas} guías canceladas por el cliente. No suman ni restan al cumplimiento del CEDI;
         quedan listadas para trazabilidad.</div>` : ''}
@@ -518,7 +518,7 @@ function render(){
   /* --- tabla de gestión --- */
   const etiqueta = g => g.clase === 'cancelada' ? ['Cancelada','et-canc']
                      : g.ajustada ? ['Ajustada','et-aj']
-                     : g.clase === 'fuera_sla' ? ['Fuera de SLA','et-out'] : ['Sin cierre','et-open'];
+                     : g.clase === 'fuera_sla' ? ['Fuera de tiempo','et-out'] : ['Pendiente','et-open'];
   const listado = criticas.concat(cancFilas);
   const filasCrit = listado.map(g => {
     const [et,cls] = etiqueta(g);
@@ -551,13 +551,14 @@ function render(){
 
   document.getElementById('reporte').innerHTML = `
   <div class="kpis">
-    <div class="kpi"><b>${T.total}</b><span>Guías en responsabilidad</span>
-      <small>base del indicador de cumplimiento</small></div>
+    <div class="kpi oro2"><b>${T.en_sla_aj}</b><span>Guías entregadas a tiempo</span>
+      <small>de ${T.total} guías del día</small></div>
     <div class="kpi oro"><b>${T.cumpl_aj}%</b><span>Cumplimiento del día</span>
       <small>${T.ajustadas ? T.cumpl+'% sin los ajustes autorizados' : 'sobre fecha comprometida'}</small></div>
-    <div class="kpi rojo"><b>${T.fuera_sla-T.ajustadas}</b><span>Fuera de SLA</span>
+    <div class="kpi rojo"><b>${T.fuera_sla-T.ajustadas}</b><span>Guías entregadas fuera de tiempo</span>
       <small>cerradas después de medianoche</small></div>
-    <div class="kpi gris"><b>${T.sin_cerrar}</b><span>Sin cierre</span><small>siguen abiertas al corte</small></div>
+    <div class="kpi gris"><b>${T.sin_cerrar}</b><span>Guías pendientes</span>
+      <small>sin cierre al corte</small></div>
     <div class="kpi"><b>${T.efectividad}%</b><span>Efectividad de entrega</span>
       <small>${T.entregadas} entregadas al destinatario</small></div>
     <div class="kpi fuera"><b>${T.canceladas}</b><span>Canceladas</span>
@@ -568,21 +569,21 @@ function render(){
     <h2>Desempeño por CEDI</h2>
     <p class="lead"><b>${esc(lider.cedi)}</b> concentra el ${Math.round(100*lider.total/T.total)}% del volumen del día.
       ${riesgoTotal ? 'El riesgo abierto se detalla en cada tarjeta con el recurso que lo explica.'
-                    : 'Ningún CEDI presenta guías fuera de SLA ni abiertas al corte.'}</p>
+                    : 'Ningún CEDI presenta guías fuera de tiempo ni pendientes al corte.'}</p>
     <div class="grid">${tarjetas}</div>
   </section>
 
   <section>
     <h2>Guías en gestión</h2>
     <p class="lead">${riesgoTotal
-        ? `<b>${riesgoTotal} guías</b> requieren gestión inmediata: ${nOut} cerradas fuera de SLA y ${nOpen} todavía abiertas.`
+        ? `<b>${riesgoTotal} guías</b> requieren gestión inmediata: ${nOut} entregadas fuera de tiempo y ${nOpen} pendientes de cierre.`
         : '<b>Sin guías en gestión:</b> el día cerró completo dentro de la fecha comprometida.'}
       ${nAj ? ` Se listan también las ${nAj} cubiertas por el ajuste autorizado.` : ''}
       ${T.canceladas ? ` Aparte, ${T.canceladas} guías canceladas por el cliente quedan listadas para trazabilidad, sin entrar al indicador.` : ''}</p>
     <div class="filtros">
       <button data-f="todo" aria-pressed="true">Todas (${listado.length})</button>
-      <button data-f="et-out" aria-pressed="false">Fuera de SLA (${nOut+nAj})</button>
-      <button data-f="et-open" aria-pressed="false">Sin cierre (${nOpen})</button>
+      <button data-f="et-out" aria-pressed="false">Fuera de tiempo (${nOut+nAj})</button>
+      <button data-f="et-open" aria-pressed="false">Pendientes (${nOpen})</button>
       ${nAj ? `<button data-f="et-aj" aria-pressed="false">Ajuste autorizado (${nAj})</button>` : ''}
       ${T.canceladas ? `<button data-f="et-canc" aria-pressed="false">Canceladas (${T.canceladas})</button>` : ''}
     </div>
@@ -590,7 +591,7 @@ function render(){
       ${listado.length ? `<table><thead><tr><th>Guía</th><th>CEDI</th><th>Ciudad</th><th>Recurso</th>
         <th>Estado</th><th>Novedad</th><th>Cierre</th><th>Clasificación</th><th>Dirección</th></tr></thead>
         <tbody id="cuerpo">${filasCrit}</tbody></table>`
-        : '<div class="vacio">No hay guías fuera de SLA, abiertas ni canceladas en este corte.</div>'}
+        : '<div class="vacio">No hay guías fuera de tiempo, pendientes ni canceladas en este corte.</div>'}
     </div>
   </section>
 
@@ -606,13 +607,13 @@ function render(){
       <li>Universo del indicador: ${T.total} guías con fecha de servicio ${esc(fechaLarga(fop))}.
         Las ${T.canceladas} canceladas se listan y se cuentan aparte, pero no entran al cálculo del
         cumplimiento por no corresponder a responsabilidad de la operación.</li>
-      <li>Cumple quien registra cierre dentro del día comprometido. Cierre con fecha posterior se clasifica
-        fuera de SLA; sin registro de cierre se clasifica abierta.</li>
+      <li>Entregada a tiempo es la guía que registra cierre dentro del día comprometido. Cierre con fecha
+        posterior se clasifica entregada fuera de tiempo; sin registro de cierre queda pendiente.</li>
       ${T.ajustadas ? `<li>Ajuste autorizado: ${T.ajustadas} cierres del ${ddMes(fsig)} en
         ${[...ESTADO.ajustes].map(esc).join(', ')} se reconocen dentro del día por novedad del recurso,
         y se reportan de forma visible para no perder trazabilidad.</li>` : ''}
-      <li>Efectividad de entrega mide guías con novedad «Entregado» sobre el universo; es un indicador distinto
-        al de cumplimiento de fecha.</li>
+      <li>Efectividad de entrega mide guías con novedad «Entregado» sobre el universo del día; es un indicador
+        distinto al de cumplimiento, que mide oportunidad.</li>
     </ol>
   </div>
 
@@ -637,7 +638,7 @@ function exportarCsv(){
   const cab = ['Guia','CEDI','Ciudad','Recurso','Estado','Novedad','Fecha cierre o cancelacion','Hora','Clasificacion','Direccion'];
   const clasif = g => g.clase === 'cancelada' ? 'Cancelada (fuera del indicador)'
                     : g.ajustada ? 'Ajuste autorizado'
-                    : g.clase === 'fuera_sla' ? 'Fuera de SLA' : 'Sin cierre';
+                    : g.clase === 'fuera_sla' ? 'Fuera de tiempo' : 'Pendiente';
   const filas = ESTADO.calc.criticas.concat(ESTADO.calc.cancFilas).map(g => [
     g.guia, g.cedi, g.ciudad, g.recurso, g.estado,
     g.novedad || (g.clase === 'cancelada' ? 'Cancelada por el cliente' : 'Sin cierre'),
